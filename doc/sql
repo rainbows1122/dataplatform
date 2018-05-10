@@ -1,0 +1,305 @@
+yc_tools;
+
+CREATE TABLE `basis_data_rule` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `key` varchar(255) NOT NULL DEFAULT '' COMMENT '关键字',
+  `name` varchar(255) NOT NULL DEFAULT '' COMMENT '名称',
+  `description` varchar(255) NOT NULL DEFAULT '' COMMENT '指标描述',
+  `value` varchar(255) NOT NULL DEFAULT '' COMMENT '量度',
+  `dimension` text NOT NULL COMMENT '维度',
+  `index` text NOT NULL COMMENT '索引',
+  `source` varchar(10) NOT NULL DEFAULT 'mysql' COMMENT '数据源',
+  `cycle` varchar(10) NOT NULL DEFAULT '1_days' COMMENT '回溯时长',
+  `basis_type` varchar(11) NOT NULL DEFAULT 'aggregator' COMMENT '指标类型',
+  `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '是否开启',
+  `user_id` int(11) NOT NULL,
+  `user_name` varchar(255) NOT NULL DEFAULT '',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `deleted_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uiq_key` (`key`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8
+
+CREATE TABLE `basis_dimension` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `key` varchar(255) NOT NULL DEFAULT '' COMMENT '唯一标识',
+  `name` varchar(20) NOT NULL DEFAULT '' COMMENT '名称',
+  `description` varchar(100) NOT NULL DEFAULT '' COMMENT '描述',
+  `field` text NOT NULL COMMENT '字段',
+  `class` varchar(255) NOT NULL DEFAULT '' COMMENT '使用的server类',
+  `field_name` varchar(50) NOT NULL DEFAULT '' COMMENT '字段名',
+  `field_type` varchar(50) NOT NULL DEFAULT '' COMMENT '字段类型',
+  `data_api` varchar(1000) NOT NULL DEFAULT '' COMMENT '维度内容列表API',
+  `data_list` text NOT NULL COMMENT '维度内容列表KV',
+  `user_id` int(11) NOT NULL,
+  `user_name` varchar(20) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uiq_key` (`key`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8
+
+CREATE TABLE `basis_dimension_info` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `dm_id` int(11) NOT NULL COMMENT '维度id',
+  `dm_name` varchar(50) NOT NULL DEFAULT '' COMMENT '维度明细名称',
+  `dm_key` varchar(50) NOT NULL DEFAULT '',
+  `dm_source` varchar(10) NOT NULL DEFAULT 'mysql' COMMENT '维度明细数据源',
+  `dm_database` varchar(20) NOT NULL DEFAULT '' COMMENT '维度明细源数据库',
+  `dm_table` varchar(50) NOT NULL DEFAULT '' COMMENT '维度明细源数据表',
+  `dm_type` varchar(10) NOT NULL DEFAULT 'default' COMMENT '维度编辑类型，常规，代码',
+  `dm_code` text NOT NULL COMMENT '维度明细代码',
+  `dm_rule` text NOT NULL COMMENT '维度明细表达式',
+  `user_id` int(11) NOT NULL,
+  `user_name` varchar(30) NOT NULL DEFAULT '',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8
+
+CREATE TABLE `basis_value` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `key` varchar(255) NOT NULL DEFAULT '' COMMENT '唯一标识',
+  `name` varchar(20) NOT NULL DEFAULT '' COMMENT '名称',
+  `description` varchar(100) NOT NULL DEFAULT '' COMMENT '描述',
+  `field` text NOT NULL COMMENT '字段',
+  `class` varchar(255) NOT NULL DEFAULT '' COMMENT '使用的server类',
+  `field_name` varchar(50) NOT NULL DEFAULT '' COMMENT '字段名',
+  `field_type` varchar(50) NOT NULL DEFAULT '' COMMENT '字段类型',
+  `data_mysql_database` varchar(50) NOT NULL DEFAULT '' COMMENT 'mysql库',
+  `data_mysql_table` varchar(50) NOT NULL DEFAULT '' COMMENT 'mysql表',
+  `data_mysql_type` varchar(20) NOT NULL DEFAULT 'default' COMMENT 'mysql方式选择：常规方式，代码方式',
+  `data_mysql_rule` text NOT NULL COMMENT 'mysql表达式',
+  `data_mysql_code` text NOT NULL COMMENT 'mysql代码',
+  `data_hive_database` varchar(50) NOT NULL DEFAULT '' COMMENT 'hive库',
+  `data_hive_table` varchar(50) NOT NULL DEFAULT '' COMMENT 'hive表',
+  `data_hive_type` varchar(20) NOT NULL DEFAULT 'default' COMMENT 'hive方式选择：常规方式，代码方式',
+  `data_hive_dttmp` varchar(10) NOT NULL DEFAULT 'Ymd' COMMENT 'hive分区类型',
+  `data_hive_rule` text NOT NULL COMMENT 'hive表达式',
+  `data_hive_code` text NOT NULL COMMENT 'hive代码',
+  `user_id` int(11) NOT NULL,
+  `user_name` varchar(20) NOT NULL DEFAULT '',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8
+
+CREATE TABLE `business_data_rule` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `hash_code` varchar(50) NOT NULL DEFAULT '' COMMENT 'hash_code',
+  `server_name` varchar(50) NOT NULL DEFAULT '' COMMENT '业务指标名称',
+  `value` varchar(50) NOT NULL DEFAULT '' COMMENT '基础指标',
+  `value_field` varchar(50) NOT NULL DEFAULT '' COMMENT '基础指标量度字段',
+  `rule` text NOT NULL COMMENT '条件',
+  `group` varchar(255) NOT NULL DEFAULT '[]' COMMENT '维度',
+  `dim_field` varchar(255) NOT NULL DEFAULT '[]' COMMENT '维度字段',
+  `cycle` varchar(20) NOT NULL DEFAULT '' COMMENT '追溯时长',
+  `start_date` date DEFAULT '0000-00-00' COMMENT '数据执行起始时间',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否开启，0非1是',
+  `origin_params` text NOT NULL COMMENT '原始参数',
+  `decimal_len` int(11) NOT NULL DEFAULT '2' COMMENT '小数点后保留几位',
+  `type` varchar(50) NOT NULL DEFAULT 'single' COMMENT '指标类型，single单指标，many多指标运算',
+  `user_id` int(11) NOT NULL DEFAULT '0' COMMENT '操作人',
+  `user_name` varchar(50) NOT NULL DEFAULT '' COMMENT '操作人',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `deleted_at` datetime DEFAULT NULL,
+  `server_name_py` varchar(255) NOT NULL COMMENT '指标名称拼音',
+  `description` varchar(255) NOT NULL DEFAULT '' COMMENT '指标描述',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `server_name` (`server_name`),
+  UNIQUE KEY `hash_code` (`hash_code`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8
+
+CREATE TABLE `business_tags` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `tag_name` varchar(20) NOT NULL DEFAULT '' COMMENT '标签名称',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `tag_name` (`tag_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+
+CREATE TABLE `business_tags_relation` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `tag_id` int(11) NOT NULL,
+  `rule_id` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `rule_tag` (`tag_id`,`rule_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+
+CREATE TABLE `database_info` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL DEFAULT '' COMMENT '链接名',
+  `name_py` varchar(100) NOT NULL DEFAULT '' COMMENT '链接名拼音',
+  `host` varchar(20) NOT NULL DEFAULT '' COMMENT 'ip',
+  `driver` varchar(10) NOT NULL DEFAULT 'mysql' COMMENT '数据库类型',
+  `database` varchar(50) NOT NULL DEFAULT '' COMMENT '数据库名',
+  `username` varchar(50) NOT NULL DEFAULT '' COMMENT '数据库用户名',
+  `password` varchar(100) NOT NULL DEFAULT '' COMMENT '密码',
+  `charset` varchar(20) NOT NULL DEFAULT 'utf8' COMMENT '字符集',
+  `collation` varchar(100) NOT NULL DEFAULT 'utf8_unicode_ci' COMMENT '字符集校验',
+  `user_id` int(11) NOT NULL COMMENT '用户id',
+  `user_name` varchar(20) NOT NULL DEFAULT '' COMMENT '用户名',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8
+
+CREATE TABLE `detail_list` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `key` varchar(255) NOT NULL DEFAULT '' COMMENT '关键词',
+  `name` varchar(255) NOT NULL DEFAULT '' COMMENT '名称',
+  `class` varchar(255) NOT NULL DEFAULT '' COMMENT '执行类',
+  `source` varchar(10) NOT NULL DEFAULT '' COMMENT '数据源',
+  `cycle` varchar(20) NOT NULL DEFAULT '1_days' COMMENT '回溯时长',
+  `load_type` varchar(20) NOT NULL DEFAULT 'all' COMMENT '加载方式  全量 增量',
+  `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '状态',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8
+
+CREATE TABLE `index_monitoring` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `server_name` varchar(50) NOT NULL DEFAULT '' COMMENT '监控名称',
+  `hash_code` char(40) NOT NULL DEFAULT '',
+  `index_hash` char(40) NOT NULL DEFAULT '' COMMENT '监控指标hash',
+  `cycle_type` varchar(15) NOT NULL COMMENT '周期类型',
+  `cycle_num` smallint(6) NOT NULL DEFAULT '0' COMMENT '周期类型值',
+  `rule_str` text NOT NULL COMMENT '规则表达式',
+  `rule_list` text NOT NULL COMMENT '监控规则',
+  `connect` varchar(1000) NOT NULL DEFAULT '' COMMENT '联系方式',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否开启，0非1是',
+  `origin_params` text NOT NULL COMMENT '原始参数',
+  `user_id` int(11) NOT NULL DEFAULT '0' COMMENT '操作人',
+  `user_name` varchar(50) NOT NULL DEFAULT '' COMMENT '操作人',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `deleted_at` datetime DEFAULT NULL,
+  `level` varchar(10) NOT NULL DEFAULT 'high' COMMENT '监控级别',
+  PRIMARY KEY (`id`),
+  KEY `idx_index_hash` (`index_hash`),
+  KEY `idx_hash_code` (`hash_code`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8
+
+CREATE TABLE `index_monitoring_log` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL DEFAULT '' COMMENT '名称',
+  `index_name` varchar(50) NOT NULL DEFAULT '' COMMENT '监控指标名称',
+  `batch_hash` char(40) NOT NULL DEFAULT '' COMMENT '批次号',
+  `self_hash` char(40) NOT NULL DEFAULT '' COMMENT 'hash',
+  `parent_hash` char(40) NOT NULL DEFAULT '' COMMENT '父级hash',
+  `type` varchar(10) NOT NULL DEFAULT '' COMMENT '类型',
+  `params` text NOT NULL COMMENT '其他参数',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '验证状态',
+  `log_datetime` timestamp NULL DEFAULT NULL COMMENT '校验数据时间',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_parent_hash` (`parent_hash`),
+  KEY `idx_batch_hash` (`batch_hash`),
+  KEY `idx_self_hash` (`self_hash`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8
+
+CREATE TABLE `job_shell_list` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `key` varchar(255) NOT NULL DEFAULT '' COMMENT '关键词',
+  `name` varchar(255) NOT NULL DEFAULT '' COMMENT '名称',
+  `description` varchar(255) NOT NULL DEFAULT '' COMMENT '描述',
+  `source` varchar(20) NOT NULL DEFAULT '' COMMENT '数据源',
+  `shell` varchar(255) NOT NULL DEFAULT '' COMMENT 'shell地址',
+  `script_type` varchar(20) NOT NULL DEFAULT '' COMMENT '任务类型',
+  `cycle` varchar(20) NOT NULL DEFAULT '1_days' COMMENT '回溯时长',
+  `type` varchar(20) NOT NULL DEFAULT 'system' COMMENT '是否系统创建',
+  `refresh_history` smallint(6) NOT NULL DEFAULT '1' COMMENT '是否可以刷新历史',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `uiq_key` (`key`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8
+
+CREATE TABLE `scheduling_config` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `key` varchar(255) NOT NULL DEFAULT '' COMMENT '关键词',
+  `name` varchar(255) NOT NULL DEFAULT '' COMMENT '名称',
+  `allow_empty` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否允许空数据',
+  `crontab` varchar(50) NOT NULL DEFAULT '' COMMENT 'crontab时间',
+  `need` text NOT NULL COMMENT '依赖key',
+  `time_out` int(11) NOT NULL DEFAULT '20' COMMENT '超时时间  单位分',
+  `source` varchar(20) NOT NULL DEFAULT '' COMMENT '数据源',
+  `command` varchar(255) NOT NULL DEFAULT '' COMMENT '执行命令',
+  `order` smallint(6) NOT NULL DEFAULT '0' COMMENT '执行顺序 仅其他任务可用',
+  `status` tinyint(4) NOT NULL DEFAULT '1',
+  `type` varchar(10) NOT NULL DEFAULT 'system' COMMENT '调度类型',
+  `user_id` int(11) NOT NULL,
+  `user_name` varchar(20) NOT NULL DEFAULT '',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uiq_key` (`key`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8
+
+CREATE TABLE `script_scheduling` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `batch_id` varchar(40) NOT NULL,
+  `run_datetime` datetime DEFAULT NULL COMMENT '指定的执行日期',
+  `script_name` varchar(255) DEFAULT '' COMMENT '执行完成的脚本',
+  `script_name_cn` varchar(255) DEFAULT NULL COMMENT '执行任务的中文',
+  `command` varchar(255) DEFAULT '' COMMENT '脚本路径',
+  `run_status` int(11) DEFAULT '0' COMMENT '执行状态-1失败，1成功',
+  `err_log` text COMMENT '错误日志',
+  `run_log` text COMMENT '执行日志',
+  `log_file` varchar(255) NOT NULL DEFAULT '',
+  `err_file` varchar(255) NOT NULL DEFAULT '',
+  `host` varchar(15) NOT NULL DEFAULT '',
+  `user` varchar(50) NOT NULL DEFAULT '',
+  `path` varchar(50) NOT NULL DEFAULT '',
+  `start_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '脚本开始执行的时间',
+  `end_time` timestamp NULL DEFAULT NULL COMMENT '脚本结束执行的时间',
+  `execute_time` int(11) NOT NULL DEFAULT '0' COMMENT '脚本执行的秒数',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `need` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `date_name_status` (`run_datetime`),
+  KEY `idx_batch_id` (`batch_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8
+
+CREATE TABLE `split_table` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `class` varchar(255) NOT NULL DEFAULT '' COMMENT 'model类名',
+  `table_name` varchar(255) NOT NULL DEFAULT '' COMMENT '表名',
+  `source_table` varchar(255) NOT NULL DEFAULT '' COMMENT '分表初始表',
+  `start_at` datetime NOT NULL COMMENT '开始时间,如果是null则为首表',
+  `is_done` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否分表成功',
+  `bak_time` datetime DEFAULT NULL COMMENT '备份时间，null：使用中',
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `table_count` int(11) NOT NULL DEFAULT '0' COMMENT '单表数据量',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uiq_class_table_start` (`class`,`table_name`,`start_at`),
+  UNIQUE KEY `uiq_table` (`table_name`),
+  KEY `idx_start_at` (`start_at`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8
+
+CREATE TABLE `tables_join_on` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `database` varchar(255) NOT NULL DEFAULT '' COMMENT '库',
+  `self_table` varchar(255) NOT NULL DEFAULT '' COMMENT '主表',
+  `join_table` varchar(255) NOT NULL DEFAULT '' COMMENT '关联表',
+  `join_type` varchar(10) NOT NULL DEFAULT '' COMMENT '关联类型',
+  `self_on` varchar(255) NOT NULL DEFAULT '' COMMENT '主表关联字段',
+  `join_on` varchar(255) NOT NULL DEFAULT '' COMMENT '关联表关联字段',
+  `user_id` int(11) NOT NULL,
+  `user_name` varchar(20) NOT NULL DEFAULT '',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `deleted_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8
